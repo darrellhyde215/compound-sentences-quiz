@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="A personal study game for a grammar lesson on compound sentences.">
+<meta name="theme-color" content="#fbf9f4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14161d" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Clause &amp; Effect">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Clause &amp; Effect</title>
+<style>
+:root{
+  --bg:#fbf9f4; --panel:#ffffff; --ink:#1e2130; --muted:#5b6273;
+  --line:#e2ddd2; --accent:#5b4bc4; --accent-ink:#ffffff;
+  --warm:#e07b39; --bad:#c23b2e; --good:#1f8a5f;
+  --chip:#f0ecfa; --shadow:0 2px 0 rgba(0,0,0,.06), 0 8px 24px rgba(30,33,48,.07);
+  --radius:14px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#14161d; --panel:#1d2029; --ink:#f0ece6; --muted:#a2aab9;
+    --line:#2d3340; --accent:#9d8cf0; --accent-ink:#141019;
+    --warm:#f0a95f; --bad:#e8705f; --good:#45c08c;
+    --chip:#272b38; --shadow:0 2px 0 rgba(0,0,0,.2), 0 8px 24px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14161d; --panel:#1d2029; --ink:#f0ece6; --muted:#a2aab9;
+  --line:#2d3340; --accent:#9d8cf0; --accent-ink:#141019;
+  --warm:#f0a95f; --bad:#e8705f; --good:#45c08c;
+  --chip:#272b38; --shadow:0 2px 0 rgba(0,0,0,.2), 0 8px 24px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--ink);
+  font:16px/1.5 ui-rounded,"SF Pro Rounded",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,system-ui,sans-serif;
+  -webkit-text-size-adjust:100%;
+}
+.wrap{max-width:760px;margin:0 auto;padding:20px 16px 56px}
+header.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+h1{font-size:22px;margin:0;letter-spacing:-.01em}
+h1 .sub{display:block;font-size:13px;font-weight:500;color:var(--muted);letter-spacing:0}
+.spacer{flex:1}
+button{font:inherit;cursor:pointer}
+.ghost{
+  background:transparent;border:1.5px solid var(--line);color:var(--muted);
+  border-radius:999px;padding:7px 14px;font-size:13px;font-weight:600;
+}
+.ghost:hover{border-color:var(--accent);color:var(--accent)}
+.ghost[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.card{
+  background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+  box-shadow:var(--shadow);padding:22px;
+}
+.hidden{display:none !important}
+
+/* ---- start screen ---- */
+.hero{text-align:center;padding:30px 22px 26px}
+.hero h2{margin:0 0 8px;font-size:27px;letter-spacing:-.02em}
+.hero p{margin:0 auto 20px;max-width:46ch;color:var(--muted)}
+.big{
+  background:var(--accent);color:var(--accent-ink);border:0;border-radius:999px;
+  padding:14px 30px;font-size:17px;font-weight:700;box-shadow:0 3px 0 rgba(0,0,0,.14);
+}
+.big:active{transform:translateY(2px);box-shadow:none}
+.big.alt{background:var(--chip);color:var(--ink);box-shadow:0 3px 0 rgba(0,0,0,.08)}
+.btnrow{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.modes{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:0 0 18px}
+.picker{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:0 0 6px}
+.picklabel{font-size:12px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
+.deckhead{font-size:19px;letter-spacing:-.01em;margin:30px 0 2px;padding-bottom:8px;border-bottom:2px solid var(--line)}
+.deckhead:first-child{margin-top:0}
+.bydeck{margin:10px 0 0;font-size:14px;font-weight:600;color:var(--muted)}
+.missed .who{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);display:block}
+
+/* ---- play screen ---- */
+.hud{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.pill{background:var(--chip);border-radius:999px;padding:5px 12px;font-size:13px;font-weight:700}
+.pill.streak{color:var(--warm)}
+.track{height:9px;background:var(--chip);border-radius:999px;overflow:hidden;margin-bottom:18px}
+.track>i{display:block;height:100%;background:var(--accent);width:0;transition:width .35s ease}
+.qtype{font-size:12px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--accent);margin-bottom:8px}
+.q{font-size:21px;font-weight:700;line-height:1.35;margin:0 0 18px;letter-spacing:-.01em}
+.opts{display:grid;gap:10px}
+.opt{
+  display:flex;align-items:flex-start;gap:11px;text-align:left;width:100%;
+  background:var(--panel);border:1.5px solid var(--line);border-radius:12px;
+  padding:13px 15px;color:var(--ink);font-size:16px;line-height:1.4;transition:.12s;
+}
+.opt:hover:not(:disabled){border-color:var(--accent);transform:translateX(2px)}
+.opt:disabled{cursor:default}
+.key{
+  flex:0 0 24px;height:24px;border-radius:7px;background:var(--chip);
+  display:grid;place-items:center;font-size:12px;font-weight:800;color:var(--muted);
+}
+.opt.sel{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent)}
+.opt.sel .key{background:var(--accent);color:var(--accent-ink)}
+.opt.right{border-color:var(--good);background:color-mix(in srgb,var(--good) 14%,transparent)}
+.opt.right .key{background:var(--good);color:#fff}
+.opt.wrong{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 12%,transparent)}
+.opt.wrong .key{background:var(--bad);color:#fff}
+
+/* ---- click-the-word questions ---- */
+.opts.tokens{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+.opt.tok{
+  display:inline-flex;width:auto;align-items:center;gap:0;
+  padding:9px 11px;border-radius:9px;font-size:17px;line-height:1.2;
+}
+.opt.tok:hover:not(:disabled){transform:translateY(-2px)}
+.opt.tok.punc{padding:9px 9px;font-weight:800}
+
+.hint{font-size:13px;color:var(--muted);margin:0 0 12px}
+input[type=text]{
+  font:inherit;width:100%;padding:13px 15px;border-radius:12px;
+  border:1.5px solid var(--line);background:var(--panel);color:var(--ink);
+}
+input[type=text]:focus{outline:none;border-color:var(--accent)}
+.feedback{margin-top:16px;border-radius:12px;padding:14px 16px;border-left:5px solid var(--good);background:var(--chip)}
+.feedback.no{border-left-color:var(--bad)}
+.feedback b{display:block;margin-bottom:3px}
+.feedback p{margin:0;font-size:15px;color:var(--muted)}
+.actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;align-items:center}
+
+/* ---- results ---- */
+.score{font-size:52px;font-weight:800;letter-spacing:-.03em;line-height:1;margin:6px 0 2px}
+.missed{margin-top:18px;border-top:1px solid var(--line);padding-top:16px;text-align:left}
+.missed h3{font-size:14px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 10px}
+.missed li{margin-bottom:9px;font-size:15px}
+
+/* ---- study ---- */
+.study h3{margin:24px 0 8px;font-size:16px;color:var(--accent);letter-spacing:.01em}
+.study h3:first-child{margin-top:0}
+.study dl{margin:0}
+.study dt{font-weight:700;margin-top:12px}
+.study dd{margin:2px 0 0;color:var(--muted)}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.tag{background:var(--chip);border-radius:999px;padding:3px 10px;font-size:13px;font-weight:600}
+footer{margin-top:22px;text-align:center;font-size:12px;line-height:1.5;color:var(--muted);padding-bottom:env(safe-area-inset-bottom)}
+@media (max-width:480px){
+  .q{font-size:19px} .hero h2{font-size:23px} .score{font-size:44px} .opt.tok{font-size:16px;padding:8px 9px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>Clause &amp; Effect<span class="sub">Compound sentences &middot; FANBOYS, HOTSHOTCAT &amp; semicolons</span></h1>
+    <span class="spacer"></span>
+    <button class="ghost" id="themeBtn" title="Switch light/dark">&#9680;</button>
+  </header>
+
+  <!-- START -->
+  <section id="start" class="card hero">
+    <h2>Join two thoughts.</h2>
+    <p>Answer questions about compound sentences, then take a second pass at anything you miss.</p>
+    <p class="picklabel">What do you want to study?</p>
+    <div class="picker" id="picker"></div>
+    <p class="picklabel" style="margin-top:16px">How long?</p>
+    <div class="modes">
+      <button class="ghost" id="lenQuick" data-len="12" aria-pressed="true">Quick round</button>
+      <button class="ghost" id="lenAll" data-len="0">Everything</button>
+    </div>
+    <div class="btnrow">
+      <button class="big" id="playBtn">Start a round</button>
+      <button class="big alt" id="studyBtn">Study guide</button>
+    </div>
+  </section>
+
+  <!-- PLAY -->
+  <section id="play" class="card hidden">
+    <div class="hud">
+      <span class="pill" id="pos">1 / 12</span>
+      <span class="pill" id="pts">0 pts</span>
+      <span class="pill streak hidden" id="streak">&#128293; 2</span>
+      <span class="spacer"></span>
+      <button class="ghost" id="quitBtn">Quit</button>
+    </div>
+    <div class="track"><i id="bar"></i></div>
+    <div class="qtype" id="qtype">Multiple choice</div>
+    <p class="q" id="qtext"></p>
+    <p class="hint hidden" id="hint"></p>
+    <div class="opts" id="opts"></div>
+    <div class="actions">
+      <button class="big" id="submitBtn">Check</button>
+      <button class="big alt hidden" id="nextBtn">Next &rarr;</button>
+    </div>
+    <div class="feedback hidden" id="fb"><b id="fbTitle"></b><p id="fbWhy"></p></div>
+  </section>
+
+  <!-- RESULTS -->
+  <section id="done" class="card hero hidden">
+    <h2 id="doneTitle">Round complete!</h2>
+    <div class="score" id="finalScore">0</div>
+    <p id="doneLine">points</p>
+    <p class="bydeck hidden" id="byDeck"></p>
+    <div class="btnrow">
+      <button class="big hidden" id="retryBtn">Retry the misses</button>
+      <button class="big alt" id="againBtn">New round</button>
+      <button class="big alt" id="studyBtn2">Study guide</button>
+    </div>
+    <div class="missed hidden" id="missedBox">
+      <h3>Worth another look</h3>
+      <ul id="missedList"></ul>
+    </div>
+  </section>
+
+  <!-- STUDY -->
+  <section id="study" class="card study hidden">
+    <div class="hud">
+      <span class="pill">Study guide</span>
+      <span class="spacer"></span>
+      <button class="ghost" id="backBtn">&larr; Back</button>
+    </div>
+    <div id="studyBody"></div>
+  </section>
+
+  <footer>Study game built from the classroom slide deck <em>Compound Sentences PD Notes</em>.<br>
+  The lesson, examples and practice sentences belong to their author and are used here for personal study only. Not affiliated with or endorsed by the author.</footer>
+</div>
+
+<script>
+/* ------------------------------------------------------------------ *
+ * Content decks. One per section of the notes; `n` is the slide the
+ * question comes from. Adding material = appending to a bank, or
+ * appending another deck.
+ * type: mc | tf | multi | type | spot
+ *   mc    - opts[] + a (index)
+ *   tf    - a: true|false
+ *   multi - opts[] + a: [indexes], every right one must be picked
+ *   type  - accept: [...], optional hint; case/punctuation-insensitive
+ *   spot  - tokens[] + a: [indexes]; click the parts that join the clauses
+ * ------------------------------------------------------------------ */
+const DECKS = [
+{
+ id:"rules", chip:"The 3 Ways", title:"The 3 Ways to Build a Compound Sentence",
+ bank:[
+  {n:1,type:"mc",q:"What is a compound sentence?",
+   opts:["A sentence made of two or more independent clauses",
+         "A sentence made of one independent clause and one dependent clause",
+         "A sentence with more than one verb",
+         "A sentence that is longer than ten words"],
+   a:0, why:"A compound sentence is a sentence that is made of two or more independent clauses."},
+
+  {n:1,type:"mc",q:"How many ways can compound sentences be combined?",
+   opts:["3","2","4","5"],
+   a:0, why:"Three: coordinating conjunctions (FANBOYS), adverbial conjunctions (HOTSHOTCAT), and a semicolon."},
+
+  {n:1,type:"multi",q:"Pick all three ways to combine a compound sentence.",
+   opts:["Coordinating conjunctions (FANBOYS)","Adverbial conjunctions (HOTSHOTCAT)","A semicolon",
+         "A dependent clause","A comma all by itself","A colon"],
+   a:[0,1,2], why:"The three ways are coordinating conjunctions (FANBOYS), adverbial conjunctions (HOTSHOTCAT), and a semicolon."},
+
+  {n:1,type:"mc",q:"What is an independent clause?",
+   opts:["A group of words with a subject and a verb that can stand alone as its own sentence",
+         "A group of words that needs another clause to make sense",
+         "Any group of words that contains a verb",
+         "The part of a sentence that comes after the comma"],
+   a:0, why:"An independent clause has a subject and a verb, and it can stand on its own as a complete thought."},
+
+  {n:2,type:"tf",q:"A compound sentence joins independent clauses, with no dependent clauses.",
+   a:true, why:"True. The notes say conjunctions join two or more ICs into one longer compound sentence with no dependent clauses."},
+
+  {n:3,type:"type",q:"What word helps you remember the 7 coordinating conjunctions?",
+   hint:"Seven letters. It sounds like people who love a team.",
+   accept:["fanboys"], why:"FANBOYS: For, And, Nor, But, Or, Yet, So."},
+
+  {n:9,type:"type",q:"What word helps you remember the adverbial conjunctions?",
+   hint:"Ten letters. It starts with HOT and ends with CAT.",
+   accept:["hotshotcat"], why:"HOTSHOTCAT: However, Otherwise, Therefore, Similarly, Hence, On the other hand, Then, Consequently, Also, Thus."},
+
+  {n:2,type:"mc",q:"Which punctuation goes with a coordinating conjunction?",
+   opts:["A comma at the end of the first independent clause, before the conjunction",
+         "A semicolon at the end of the first independent clause, and a comma after the conjunction",
+         "A semicolon and nothing else",
+         "No punctuation at all"],
+   a:0, why:"There must be a comma at the end of the first IC, BEFORE the conjunction."},
+
+  {n:8,type:"mc",q:"Which punctuation goes with an adverbial conjunction?",
+   opts:["A semicolon at the end of the first independent clause, and a comma after the conjunction",
+         "A comma at the end of the first independent clause, before the conjunction",
+         "A comma on both sides of the conjunction",
+         "No punctuation at all"],
+   a:0, why:"Adverbial conjunctions use a semicolon at the end of the first IC and a comma after the conjunction."},
+
+  {n:14,type:"mc",q:"In the third way, two independent clauses are joined with…",
+   opts:["A semicolon, and no conjunction at all",
+         "A semicolon and a coordinating conjunction",
+         "A comma and a conjunctive adverb",
+         "A colon"],
+   a:0, why:"Two ICs can be joined with a semicolon (and only a semicolon). There are two independent clauses; there are no conjunctions."},
+
+  {n:14,type:"tf",q:"Two independent clauses can be joined with a colon to make a compound sentence.",
+   a:false, why:"False. The notes say a semicolon, and ONLY a semicolon."},
+
+  {n:14,type:"spot",q:"Click the punctuation that joins these two independent clauses.",
+   tokens:["Mary","hit","the","ball",";","she","ran","to","first","base","."],
+   a:[4], why:"The semicolon does all the work here: Mary hit the ball; she ran to first base."},
+
+  {n:14,type:"mc",q:"Which sentence uses the semicolon method correctly?",
+   opts:["Mary hit the ball; she ran to first base.",
+         "Mary hit the ball; and she ran to first base.",
+         "Mary hit the ball, she ran to first base.",
+         "Mary hit the ball; however she ran to first base."],
+   a:0, why:"Semicolon only, no conjunction. A comma by itself is not enough, and adding a conjunction turns it into one of the other two methods."}
+ ],
+ study:[
+  {h:"The big idea",
+   items:[["Compound sentence","A sentence that is made of two or more independent clauses."],
+          ["Independent clause (IC)","A subject and a verb that can stand alone as its own sentence."],
+          ["No dependent clauses","A compound sentence joins ICs only."]]},
+  {h:"The three ways",
+   items:[["1. Coordinating conjunction","FANBOYS. Comma at the end of the first IC, before the conjunction.", ["Mary hit the ball, and she ran to first base."]],
+          ["2. Adverbial conjunction","HOTSHOTCAT. Semicolon at the end of the first IC, comma after the conjunction.", ["Mary hit the ball; hence, she ran to first base."]],
+          ["3. Semicolon","A semicolon and only a semicolon — no conjunction.", ["Mary hit the ball; she ran to first base."]]]}
+ ]
+},
+{
+ id:"fanboys", chip:"FANBOYS", title:"Way 1: Coordinating Conjunctions (FANBOYS)",
+ bank:[
+  {n:3,type:"multi",q:"Pick all seven coordinating conjunctions.",
+   opts:["For","And","Nor","But","Or","Yet","So","However","Because","Although"],
+   a:[0,1,2,3,4,5,6], why:"FANBOYS: For, And, Nor, But, Or, Yet, So. However is an adverbial conjunction; because and although are not on this list at all."},
+
+  {n:3,type:"mc",q:"In FANBOYS, the F stands for…",
+   opts:["For","From","First","Finally"],
+   a:0, why:"F is for “For”."},
+
+  {n:3,type:"mc",q:"In FANBOYS, the N stands for…",
+   opts:["Nor","Not","Now","Next"],
+   a:0, why:"N is for “Nor”."},
+
+  {n:3,type:"mc",q:"In FANBOYS, the Y stands for…",
+   opts:["Yet","Yes","You","Yonder"],
+   a:0, why:"Y is for “Yet”."},
+
+  {n:3,type:"mc",q:"In FANBOYS, the last S stands for…",
+   opts:["So","Since","Still","Suddenly"],
+   a:0, why:"S is for “So”."},
+
+  {n:2,type:"mc",q:"Where does the comma go in a FANBOYS sentence?",
+   opts:["At the end of the first independent clause, before the conjunction",
+         "Right after the conjunction",
+         "On both sides of the conjunction",
+         "At the end of the second independent clause"],
+   a:0, why:"There must be a comma at the end of the first IC, BEFORE the conjunction."},
+
+  {n:2,type:"tf",q:"In a FANBOYS sentence, the comma goes after the conjunction.",
+   a:false, why:"False. The comma goes BEFORE the conjunction, at the end of the first independent clause."},
+
+  {n:2,type:"tf",q:"“Because” is one of the coordinating conjunctions.",
+   a:false, why:"False. The seven are For, And, Nor, But, Or, Yet, So."},
+
+  {n:2,type:"tf",q:"“Yet” is one of the coordinating conjunctions.",
+   a:true, why:"True. Yet is the Y in FANBOYS."},
+
+  {n:2,type:"spot",q:"This sentence follows its own rule — click the comma and the coordinating conjunction.",
+   tokens:["They","join","two","complete","thoughts",",","and","they","must","be","used","with","a","comma","."],
+   a:[5,6], why:"The comma closes the first independent clause and “and” joins the second one."},
+
+  {n:6,type:"spot",q:"Click the comma and the coordinating conjunction that join Mary's two clauses.",
+   tokens:["Mary","hit","the","ball",",","and","she","ran","to","first","base","."],
+   a:[4,5], why:"Mary hit the ball, and she ran to first base. Comma first, then the FANBOYS word."},
+
+  {n:5,type:"mc",q:"Combine “Mary hit the ball.” and “She ran to first base.” with a coordinating conjunction.",
+   opts:["Mary hit the ball, and she ran to first base.",
+         "Mary hit the ball and, she ran to first base.",
+         "Mary hit the ball and she ran to first base.",
+         "Mary hit the ball; and she ran to first base."],
+   a:0, why:"Comma at the end of the first IC, then the conjunction, then the second IC."},
+
+  {n:16,type:"spot",q:"Click the comma and the coordinating conjunction in the sentence about Ann.",
+   tokens:["I","haven't","seen","Ann","lately",",","and","I","won't","see","her","again","until","fall","."],
+   a:[5,6], why:"Both halves could stand alone, and they are joined by a comma plus “and”."},
+
+  {n:16,type:"mc",q:"“I am going to ride my bike, and go on a walk.” Why is this NOT a compound sentence?",
+   opts:["“Go on a walk” has no subject, so it is not an independent clause",
+         "“And” is not a coordinating conjunction",
+         "The comma is in the wrong place",
+         "It is too short to be compound"],
+   a:0, why:"“Go on a walk” cannot stand on its own as a sentence, so there is only one independent clause here."},
+
+  {n:16,type:"mc",q:"“The children argue and wrangle over every little thing.” What does this sentence have?",
+   opts:["Two verbs, but only one independent clause",
+         "Two independent clauses",
+         "A dependent clause and an independent clause",
+         "A missing semicolon"],
+   a:0, why:"“Argue” and “wrangle” share one subject, so this is one clause with a compound verb — not a compound sentence."}
+ ],
+ study:[
+  {h:"The seven words",
+   items:[["FANBOYS","The seven coordinating conjunctions.", ["For","And","Nor","But","Or","Yet","So"]]]},
+  {h:"The punctuation rule",
+   items:[["Comma BEFORE the conjunction","It sits at the end of the first independent clause.", [", and", ", but", ", so"]],
+          ["Both halves must stand alone","If the second half has no subject, it is not an IC and the sentence is not compound."],
+          ["Watch out for compound verbs","“The children argue and wrangle…” is one clause with two verbs, not two clauses."]]},
+  {h:"The example",
+   items:[["Two separate sentences","Mary hit the ball. She ran to first base."],
+          ["Joined with FANBOYS","Mary hit the ball<b>, and</b> she ran to first base."]]}
+ ]
+},
+{
+ id:"hotshotcat", chip:"HOTSHOTCAT", title:"Way 2: Adverbial Conjunctions (HOTSHOTCAT)",
+ bank:[
+  {n:8,type:"mc",q:"Adverbial conjunctions have another name. What is it?",
+   opts:["Conjunctive adverbs","Coordinating conjunctions","Subordinating clauses","Compound verbs"],
+   a:0, why:"Adverbial conjunctions are also called conjunctive adverbs."},
+
+  {n:9,type:"multi",q:"Pick every adverbial conjunction (HOTSHOTCAT).",
+   opts:["However","Otherwise","Therefore","Similarly","Hence","On the other hand","Then","Consequently","Also","Thus",
+         "But","Because","So"],
+   a:[0,1,2,3,4,5,6,7,8,9],
+   why:"HOTSHOTCAT: However, Otherwise, Therefore, Similarly, Hence, On the other hand, Then, Consequently, Also, Thus. “But” and “so” are FANBOYS words."},
+
+  {n:9,type:"mc",q:"In HOTSHOTCAT, the first H stands for…",
+   opts:["However","Hence","Here","Henceforth"],
+   a:0, why:"The first H is “However”; the second H is “Hence”."},
+
+  {n:9,type:"mc",q:"In HOTSHOTCAT, the first O stands for…",
+   opts:["Otherwise","On the other hand","Often","Or"],
+   a:0, why:"The first O is “Otherwise”; the second O is “On the other hand”."},
+
+  {n:9,type:"mc",q:"In HOTSHOTCAT, the S stands for…",
+   opts:["Similarly","So","Since","Still"],
+   a:0, why:"S is for “Similarly”. “So” belongs to FANBOYS."},
+
+  {n:9,type:"mc",q:"In HOTSHOTCAT, the second O stands for…",
+   opts:["On the other hand","Otherwise","Or","Obviously"],
+   a:0, why:"The second O is the phrase “On the other hand”."},
+
+  {n:9,type:"type",q:"In HOTSHOTCAT, the second H stands for which word?",
+   hint:"Five letters. It means “therefore”.",
+   accept:["hence"], why:"The second H is “Hence”."},
+
+  {n:9,type:"type",q:"In HOTSHOTCAT, the C stands for which word?",
+   hint:"It means “as a result” and starts with C.",
+   accept:["consequently"], why:"C is for “Consequently”."},
+
+  {n:9,type:"type",q:"In HOTSHOTCAT, the last T stands for which word?",
+   hint:"Four letters, and it means “so” or “therefore”.",
+   accept:["thus"], why:"The last T is “Thus”. The first T is “Therefore” and the second T is “Then”."},
+
+  {n:8,type:"mc",q:"Which punctuation does an adverbial conjunction need?",
+   opts:["A semicolon before it and a comma after it",
+         "A comma before it and nothing after it",
+         "A comma before it and a comma after it",
+         "A semicolon before it and nothing after it"],
+   a:0, why:"Semicolon at the end of the first IC, then the conjunction, then a comma."},
+
+  {n:8,type:"tf",q:"A comma before “however” is enough to join two independent clauses.",
+   a:false, why:"False. “However” needs a semicolon before it and a comma after it."},
+
+  {n:8,type:"tf",q:"“Therefore” needs a semicolon before it and a comma after it.",
+   a:true, why:"True. That is the rule for every HOTSHOTCAT word."},
+
+  {n:8,type:"spot",q:"This sentence follows its own rule — click the semicolon, the adverbial conjunction, and the comma.",
+   tokens:["They","join","two","complete","thoughts",";","however",",","they","must","be","used","with","a","semicolon","and","a","comma","."],
+   a:[5,6,7], why:"Semicolon, then the conjunctive adverb, then the comma — all three are part of the rule."},
+
+  {n:12,type:"spot",q:"Click the semicolon, the adverbial conjunction, and the comma that join Mary's two clauses.",
+   tokens:["Mary","hit","the","ball",";","hence",",","she","ran","to","first","base","."],
+   a:[4,5,6], why:"Mary hit the ball; hence, she ran to first base."},
+
+  {n:11,type:"mc",q:"Combine “Mary hit the ball.” and “She ran to first base.” with an adverbial conjunction.",
+   opts:["Mary hit the ball; hence, she ran to first base.",
+         "Mary hit the ball, hence she ran to first base.",
+         "Mary hit the ball hence, she ran to first base.",
+         "Mary hit the ball, hence, she ran to first base."],
+   a:0, why:"Semicolon at the end of the first IC, comma after the conjunction."},
+
+  {n:16,type:"mc",q:"Which sentence is punctuated correctly?",
+   opts:["Matt ate ice cream; however, he wanted to eat pie.",
+         "Matt ate ice cream, however, he wanted to eat pie.",
+         "Matt ate ice cream however, he wanted to eat pie.",
+         "Matt ate ice cream; however he wanted to eat pie."],
+   a:0, why:"“However” is a HOTSHOTCAT word, so it takes a semicolon before and a comma after."},
+
+  {n:16,type:"mc",q:"What is wrong with “Matt ate ice cream, however, he wanted to eat pie.”?",
+   opts:["The first comma should be a semicolon",
+         "The second comma should be a semicolon",
+         "“However” should be “but”",
+         "Nothing — it is already correct"],
+   a:0, why:"An adverbial conjunction needs a semicolon at the end of the first independent clause, not a comma."}
+ ],
+ study:[
+  {h:"The ten words",
+   items:[["HOTSHOTCAT","The adverbial conjunctions, also called conjunctive adverbs.",
+           ["However","Otherwise","Therefore","Similarly","Hence","On the other hand","Then","Consequently","Also","Thus"]],
+          ["The repeats","H = However then Hence. O = Otherwise then On the other hand. T = Therefore, Then, Thus."]]},
+  {h:"The punctuation rule",
+   items:[["Semicolon BEFORE, comma AFTER","Both, every time.", ["; however,", "; therefore,", "; thus,"]],
+          ["The classic mistake","Using a comma where the semicolon belongs: “Matt ate ice cream<b>,</b> however, he wanted pie.”"]]},
+  {h:"The example",
+   items:[["Two separate sentences","Mary hit the ball. She ran to first base."],
+          ["Joined with HOTSHOTCAT","Mary hit the ball<b>; hence,</b> she ran to first base."]]}
+ ]
+},
+{
+ id:"practice", chip:"Spot & Fix", title:"Practice: Spot Them and Fix Them",
+ bank:[
+  {n:16,type:"tf",q:"Compound? “I haven't seen Ann lately, and I won't see her again until fall.”",
+   a:true, why:"Compound. Two independent clauses joined by a comma and “and”."},
+
+  {n:16,type:"tf",q:"Compound? “Mr. Holmes listens to the news every night, and he goes to bed afterwards.”",
+   a:true, why:"Compound. “He goes to bed afterwards” has its own subject and verb."},
+
+  {n:16,type:"tf",q:"Compound? “Helen is going to Spain today and will come home July 25.”",
+   a:false, why:"Not compound. One subject, two verbs — “will come home July 25” cannot stand alone."},
+
+  {n:16,type:"tf",q:"Compound? “Will you wait for me, or do you want to go ahead?”",
+   a:true, why:"Compound. Two complete questions joined by a comma and “or”."},
+
+  {n:16,type:"tf",q:"Compound? “The children argue and wrangle over every little thing.”",
+   a:false, why:"Not compound. One subject with two verbs is a compound verb, not a compound sentence."},
+
+  {n:16,type:"tf",q:"Compound? “I am going to ride my bike, and go on a walk.”",
+   a:false, why:"Not compound. “Go on a walk” has no subject, so it is not an independent clause."},
+
+  {n:16,type:"tf",q:"Compound? “Matt ate ice cream; however, he wanted to eat pie.”",
+   a:true, why:"Compound. Joined with an adverbial conjunction: semicolon, “however”, comma."},
+
+  {n:17,type:"mc",q:"The notes rewrite “Chris had a baby girl named Lucy although she wanted a boy.” How?",
+   opts:["Chris had a baby girl named Lucy; although, she wanted a boy.",
+         "Chris had a baby girl named Lucy, although she wanted a boy.",
+         "Chris had a baby girl named Lucy although, she wanted a boy.",
+         "It is left alone — it is already correct."],
+   a:0, why:"The answer key punctuates it with a semicolon before and a comma after, the same shape as a HOTSHOTCAT sentence."},
+
+  {n:18,type:"mc",q:"Fix it: “Allison 4 miles yesterday therefore, she was hungry when he got home.”",
+   opts:["Allison ran 4 miles yesterday; therefore, she was hungry when he got home.",
+         "Allison ran 4 miles yesterday, therefore, she was hungry when he got home.",
+         "Allison 4 miles yesterday; therefore, she was hungry when he got home.",
+         "Allison ran 4 miles yesterday therefore she was hungry when he got home."],
+   a:0, why:"Two fixes: the first clause was missing its verb (“ran”), and “therefore” needs a semicolon in front of it."},
+
+  {n:18,type:"mc",q:"Fix it: “Jodi signed up for stage crew, and signed up for light crew.”",
+   opts:["Jody signed up for stage crew, and she signed up for light crew.",
+         "Jody signed up for stage crew and signed up for light crew.",
+         "Jody signed up for stage crew; and she signed up for light crew.",
+         "Jody signed up for stage crew, and, she signed up for light crew."],
+   a:0, why:"The second half had no subject. Adding “she” makes it an independent clause."},
+
+  {n:18,type:"mc",q:"Fix it: “Jayne typed up the essay; but, she forgot to submit it.”",
+   opts:["Jayne typed up the essay, but she forgot to submit it.",
+         "Jayne typed up the essay; but she forgot to submit it.",
+         "Jayne typed up the essay but, she forgot to submit it.",
+         "Jayne typed up the essay, but, she forgot to submit it."],
+   a:0, why:"“But” is a FANBOYS word, so it takes a comma before it and nothing after it."},
+
+  {n:18,type:"mc",q:"Fix it: “Wesley watched Stranger Things and was scared.”",
+   opts:["Wesley watched Stranger Things, and she was scared.",
+         "Wesley watched Stranger Things; and was scared.",
+         "Wesley watched Stranger Things, and was scared.",
+         "Wesley watched Stranger Things and, she was scared."],
+   a:0, why:"It needed two things: a comma before “and”, and a subject (“she”) for the second clause."},
+
+  {n:19,type:"mc",q:"What was wrong with “Jayne typed up the essay; but, she forgot to submit it.”?",
+   opts:["The punctuation was backwards — FANBOYS words take a comma before, not a semicolon and comma",
+         "“But” is not a real conjunction",
+         "The second clause was not independent",
+         "It needed a period instead"],
+   a:0, why:"The writer used the HOTSHOTCAT punctuation on a FANBOYS word. “But” just needs a comma in front."},
+
+  {n:19,type:"multi",q:"“Wesley watched Stranger Things and was scared.” What did it need to become compound?",
+   opts:["A comma before “and”","A subject for the second clause","A semicolon","A different conjunction"],
+   a:[0,1], why:"Both: a comma before “and”, and the subject “she” so the second half can stand alone."}
+ ],
+ study:[
+  {h:"How to tell if it is compound",
+   items:[["Cover the conjunction","Can BOTH halves stand alone as their own sentence? If yes, it is compound."],
+          ["Compound verb, not compound sentence","“The children argue and wrangle…” — one subject, two verbs, one clause."],
+          ["Missing subject","“I am going to ride my bike, and go on a walk.” — the second half has no subject."]]},
+  {h:"The four fixes from the notes",
+   items:[["Allison","Allison <b>ran</b> 4 miles yesterday<b>;</b> therefore, she was hungry when he got home."],
+          ["Jody","Jody signed up for stage crew, and <b>she</b> signed up for light crew."],
+          ["Jayne","Jayne typed up the essa<b>y, b</b>ut she forgot to submit it."],
+          ["Wesley","Wesley watched Stranger Things<b>,</b> and <b>she</b> was scared."]]},
+  {h:"The two mistakes to watch for",
+   items:[["Right word, wrong punctuation","A FANBOYS word with a semicolon, or a HOTSHOTCAT word with only a comma."],
+          ["Half a clause","A second half with no subject of its own."]]}
+ ]
+}
+];
+DECKS.forEach(d => d.bank.forEach(q => q.deck = d.id));
+const DECK_BY = {}; DECKS.forEach(d => DECK_BY[d.id] = d);
+
+/* ----------------------------- state ------------------------------ */
+const $ = id => document.getElementById(id);
+let deck=[], idx=0, pts=0, streak=0, best=0, sel=new Set(), locked=false, missed=[], tripLen=12, isRetry=false;
+let picked = new Set(DECKS.map(d=>d.id));
+
+/* which decks to study: #fanboys in the URL wins, then last choice on this device */
+(function restorePick(){
+  const fromHash = (location.hash||"").replace(/^#/,"").split(",").filter(x=>DECK_BY[x]);
+  if(fromHash.length){ picked = new Set(fromHash); return; }
+  try{
+    const saved = JSON.parse(localStorage.getItem("cs-decks")||"[]").filter(x=>DECK_BY[x]);
+    if(saved.length) picked = new Set(saved);
+  }catch(e){}
+})();
+const pool = () => DECKS.filter(d=>picked.has(d.id)).flatMap(d=>d.bank);
+
+function renderPicker(){
+  const everything = picked.size===DECKS.length;
+  $("picker").innerHTML =
+    '<button class="ghost" data-pick="*" aria-pressed="'+everything+'">Everything</button>' +
+    DECKS.map(d=>'<button class="ghost" data-pick="'+d.id+'" aria-pressed="'+picked.has(d.id)+'">'+d.chip+'</button>').join("");
+  $("picker").querySelectorAll("[data-pick]").forEach(b=>{
+    b.onclick = () => {
+      const id = b.dataset.pick;
+      if(id==="*") picked = new Set(DECKS.map(d=>d.id));
+      else if(picked.has(id)){ if(picked.size>1) picked.delete(id); }   // never leave it empty
+      else picked.add(id);
+      try{ localStorage.setItem("cs-decks", JSON.stringify([...picked])); }catch(e){}
+      renderPicker(); renderModes();
+    };
+  });
+}
+function renderModes(){
+  const n = pool().length;
+  $("lenQuick").textContent = "Quick round · " + Math.min(12,n);
+  $("lenAll").textContent   = "Everything · " + n;
+}
+renderPicker(); renderModes();
+
+const shuffle = a => { a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];} return a; };
+const show = id => ["start","play","done","study"].forEach(s=>$(s).classList.toggle("hidden", s!==id));
+
+/* theme */
+$("themeBtn").onclick = () => {
+  const dark = matchMedia("(prefers-color-scheme: dark)").matches;
+  const cur = document.documentElement.getAttribute("data-theme") || (dark?"dark":"light");
+  const next = cur==="dark"?"light":"dark";
+  document.documentElement.setAttribute("data-theme", next);
+  try{ localStorage.setItem("cs-theme", next); }catch(e){}
+};
+try{ const t=localStorage.getItem("cs-theme"); if(t) document.documentElement.setAttribute("data-theme",t); }catch(e){}
+
+/* round length buttons */
+document.querySelectorAll("[data-len]").forEach(b=>{
+  b.onclick = () => {
+    document.querySelectorAll("[data-len]").forEach(x=>x.setAttribute("aria-pressed","false"));
+    b.setAttribute("aria-pressed","true");
+    tripLen = +b.dataset.len;
+  };
+});
+
+function startRound(questions){
+  deck = questions;
+  idx=0; pts=0; streak=0; best=0; missed=[];
+  show("play"); render();
+}
+$("playBtn").onclick = () => { isRetry=false; const all=shuffle(pool()); startRound(tripLen? all.slice(0,Math.min(tripLen,all.length)): all); };
+$("againBtn").onclick = () => { isRetry=false; show("start"); };
+$("studyBtn").onclick = $("studyBtn2").onclick = () => { renderStudy(); show("study"); };
+$("backBtn").onclick = () => show("start");
+$("quitBtn").onclick = () => show("start");
+$("retryBtn").onclick = () => { isRetry=true; startRound(shuffle(missed)); };
+
+/* ----------------------------- render ----------------------------- */
+const LABELS = {mc:"Multiple choice", tf:"True or false", multi:"Pick every right answer",
+                type:"Type your answer", spot:"Click every part that joins the clauses"};
+const MULTIPICK = t => t==="multi" || t==="spot";
+const isPunc = t => /^[,;.:!?]+$/.test(t);
+
+function render(){
+  const q = deck[idx];
+  sel = new Set(); locked=false;
+  $("pos").textContent = (idx+1)+" / "+deck.length;
+  $("pts").textContent = pts+" pts";
+  $("bar").style.width = (idx/deck.length*100)+"%";
+  $("streak").classList.toggle("hidden", streak<2);
+  $("streak").textContent = "\u{1F525} "+streak;
+  $("qtype").textContent = LABELS[q.type];
+  $("qtext").textContent = q.q;
+  $("fb").classList.add("hidden");
+  $("submitBtn").classList.remove("hidden");
+  $("nextBtn").classList.add("hidden");
+  $("submitBtn").textContent = "Check";
+  $("hint").classList.toggle("hidden", !q.hint);
+  if(q.hint) $("hint").textContent = q.hint;
+
+  const box = $("opts");
+  box.innerHTML="";
+  box.classList.toggle("tokens", q.type==="spot");
+
+  if(q.type==="type"){
+    const inp = document.createElement("input");
+    inp.type="text"; inp.id="typed"; inp.autocomplete="off"; inp.autocapitalize="off";
+    inp.spellcheck=false; inp.placeholder="Type it here…";
+    inp.addEventListener("keydown", e=>{ if(e.key==="Enter") $("submitBtn").click(); });
+    box.appendChild(inp); setTimeout(()=>inp.focus(),50);
+    return;
+  }
+
+  if(q.type==="spot"){
+    q.tokens.forEach((tok,i)=>{
+      const b=document.createElement("button");
+      b.className="opt tok"+(isPunc(tok)?" punc":"");
+      b.dataset.orig=i; b.textContent=tok;
+      b.onclick = ()=>{
+        if(locked) return;
+        sel.has(i)?sel.delete(i):sel.add(i);
+        b.classList.toggle("sel");
+      };
+      box.appendChild(b);
+    });
+    return;
+  }
+
+  const opts = q.type==="tf" ? ["True","False"] : q.opts;
+  q._order = q.type==="tf" ? [0,1] : (q._order && q._order.length===opts.length ? q._order : shuffle(opts.map((_,i)=>i)));
+  q._order.forEach((orig,pos)=>{
+    const b=document.createElement("button");
+    b.className="opt"; b.dataset.orig=orig;
+    b.innerHTML = '<span class="key">'+(pos+1)+'</span><span>'+opts[orig]+'</span>';
+    b.onclick = ()=>{
+      if(locked) return;
+      if(MULTIPICK(q.type)){ sel.has(orig)?sel.delete(orig):sel.add(orig); b.classList.toggle("sel"); }
+      else { sel=new Set([orig]); box.querySelectorAll(".opt").forEach(x=>x.classList.remove("sel")); b.classList.add("sel"); }
+    };
+    box.appendChild(b);
+  });
+}
+
+function correctSet(q){
+  if(q.type==="tf") return new Set([q.a?0:1]);          // 0 = True, 1 = False
+  if(MULTIPICK(q.type)) return new Set(q.a);
+  return new Set([q.a]);
+}
+const norm = s => s.toLowerCase().replace(/[^a-z]/g,"");
+
+$("submitBtn").onclick = () => {
+  if(locked) return;
+  const q = deck[idx];
+  let ok=false;
+  if(q.type==="type"){
+    const v = norm($("typed").value);
+    if(!v) return;
+    ok = q.accept.some(a=>norm(a)===v || (v.length>4 && norm(a).startsWith(v)));
+    $("typed").disabled = true;
+  } else {
+    if(!sel.size) return;
+    const want = correctSet(q);
+    ok = sel.size===want.size && [...sel].every(x=>want.has(x));
+    $("opts").querySelectorAll(".opt").forEach(b=>{
+      const o=+b.dataset.orig; b.disabled=true; b.classList.remove("sel");
+      if(want.has(o)) b.classList.add("right");
+      else if(sel.has(o)) b.classList.add("wrong");
+    });
+  }
+  locked=true;
+  if(ok){
+    streak++; best=Math.max(best,streak);
+    const bonus = streak>=3 ? 5 : 0;
+    pts += 10 + bonus;
+    $("fb").className="feedback";
+    $("fbTitle").textContent = bonus ? "Correct! +"+(10+bonus)+" (streak bonus)" : "Correct! +10";
+  } else {
+    streak=0;
+    missed.push(q);
+    $("fb").className="feedback no";
+    $("fbTitle").textContent = "Not quite.";
+  }
+  $("fbWhy").textContent = q.why;
+  $("fb").classList.remove("hidden");
+  $("pts").textContent = pts+" pts";
+  $("streak").classList.toggle("hidden", streak<2);
+  $("streak").textContent = "\u{1F525} "+streak;
+  $("submitBtn").classList.add("hidden");
+  $("nextBtn").classList.remove("hidden");
+  $("nextBtn").textContent = idx===deck.length-1 ? "See results →" : "Next →";
+  $("nextBtn").focus();
+};
+
+$("nextBtn").onclick = () => {
+  idx++;
+  if(idx>=deck.length) finish(); else render();
+};
+
+function finish(){
+  $("bar").style.width="100%";
+  const total = deck.length, right = total - missed.length;
+  const pct = Math.round(right/total*100);
+  $("finalScore").textContent = right+" / "+total;
+  $("doneLine").textContent = pts+" points · best streak "+best+" · "+pct+"%";
+  $("doneTitle").textContent =
+    pct===100 ? (isRetry?"Cleaned them up!":"Perfect round!") :
+    pct>=80 ? "Nicely joined!" :
+    pct>=60 ? "Good start — keep going." : "Let's run it again.";
+  const used = [...new Set(deck.map(q=>q.deck))];
+  if(used.length>1){
+    $("byDeck").textContent = used.map(id=>{
+      const qs=deck.filter(q=>q.deck===id), miss=missed.filter(q=>q.deck===id).length;
+      return DECK_BY[id].chip+"  "+(qs.length-miss)+"/"+qs.length;
+    }).join("   ·   ");
+    $("byDeck").classList.remove("hidden");
+  } else $("byDeck").classList.add("hidden");
+  const box=$("missedBox"), list=$("missedList");
+  if(missed.length){
+    list.innerHTML = missed.map(q=>"<li>"+(used.length>1?'<span class="who">'+DECK_BY[q.deck].chip+"</span>":"")+"<b>"+q.q+"</b><br>"+q.why+"</li>").join("");
+    box.classList.remove("hidden");
+    $("retryBtn").classList.remove("hidden");
+    $("retryBtn").textContent = "Retry the "+missed.length+" miss"+(missed.length>1?"es":"");
+  } else {
+    box.classList.add("hidden");
+    $("retryBtn").classList.add("hidden");
+  }
+  show("done");
+}
+
+/* keyboard: 1-9 pick (not on click-the-word questions), Enter check/next */
+document.addEventListener("keydown", e=>{
+  if($("play").classList.contains("hidden")) return;
+  if(e.target.tagName==="INPUT") return;
+  if(/^[1-9]$/.test(e.key)){
+    if(deck[idx] && deck[idx].type==="spot") return;
+    const b=$("opts").querySelectorAll(".opt")[+e.key-1];
+    if(b && !b.disabled){ b.click(); e.preventDefault(); }
+  } else if(e.key==="Enter"){
+    (locked ? $("nextBtn") : $("submitBtn")).click(); e.preventDefault();
+  }
+});
+
+/* ----------------------------- study ------------------------------ */
+function renderStudy(){
+  const ds = DECKS.filter(d=>picked.has(d.id));
+  $("studyBody").innerHTML = ds.map(d=>
+    (ds.length>1 ? '<h2 class="deckhead">'+d.title+"</h2>" : "") +
+    d.study.map(sec=>
+      "<h3>"+sec.h+"</h3><dl>"+sec.items.map(it=>
+        "<dt>"+it[0]+"</dt><dd>"+it[1]+
+        (it[2]?'<div class="tags">'+it[2].map(t=>'<span class="tag">'+t+'</span>').join("")+'</div>':"")+
+        "</dd>").join("")+"</dl>"
+    ).join("")
+  ).join("");
+}
+</script>
+</body>
+</html>
